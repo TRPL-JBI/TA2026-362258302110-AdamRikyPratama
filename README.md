@@ -1,6 +1,6 @@
 # 🎭 KITA BANYUWANGI — KARTU INDUK KESENIAN DIGITAL BANYUWANGI
 
-> Platform digital untuk pendataan, verifikasi, dan pusat informasi kelompok/organisasi kesenian daerah — dari pendaftaran mandiri oleh komunitas seni, verifikasi berjenjang oleh admin, hingga penerbitan Kartu Tanda Anggota (KTA) digital.
+> Platform digital untuk pendataan, verifikasi, dan pusat informasi kelompok/organisasi kesenian daerah — dari pendaftaran mandiri oleh komunitas seni, verifikasi berjenjang oleh admin, hingga penerbitan Kartu Induk Kesenian (KIK) digital.
 
 ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=flat&logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat&logo=php&logoColor=white)
@@ -30,7 +30,7 @@ Ada dua "dunia" utama dalam sistem ini:
 
 | Dunia                                 | Untuk siapa                      | Tujuan                                                                                                                |
 | ------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 🙋 **Panel User (Pengurus Kesenian)** | Ketua/pengurus kelompok kesenian | Mendaftarkan organisasi, melengkapi data anggota, inventaris & dokumen pendukung, memantau status verifikasi          |
+| 🙋 **Panel User (Kelompok Kesenian)** | Ketua/pengurus kelompok kesenian | Mendaftarkan organisasi, melengkapi data anggota, inventaris & dokumen pendukung, memantau status verifikasi          |
 | 🛡️ **Panel Admin (Dinas)**            | Petugas verifikator/admin        | Meninjau & memvalidasi pengajuan, mengelola master data wilayah & jenis kesenian, mencetak laporan, menerbitkan kartu |
 
 ---
