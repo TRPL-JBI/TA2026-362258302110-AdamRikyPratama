@@ -1,4 +1,4 @@
-# 🎭 KITA BANYUWANGI - KARTU INDUK KESENIAN DIGITAL BANYUWANGI
+# 🎭 SIKESAN — Sistem Informasi & Pendataan Kesenian Daerah
 
 > Platform digital untuk pendataan, verifikasi, dan pusat informasi kelompok/organisasi kesenian daerah — dari pendaftaran mandiri oleh komunitas seni, verifikasi berjenjang oleh admin, hingga penerbitan Kartu Tanda Anggota (KTA) digital.
 
@@ -13,8 +13,8 @@
 - [Gambaran Umum](#-gambaran-umum)
 - [Alur Program Secara Garis Besar](#-alur-program-secara-garis-besar)
 - [Peta Controller](#-peta-controller)
-- [🆕 Fitur Baru: Input Kegiatan Kesenian](#-fitur-baru-input-kegiatan-kesenian)
-- [🆕 Fitur Baru: Landing Page Pusat Informasi Kegiatan Kesenian](#-fitur-baru-landing-page-pusat-informasi-kegiatan-kesenian)
+- [🆕 Fitur Baru: Promosi Kegiatan (Khusus KIK Aktif)](#-fitur-baru-promosi-kegiatan-khusus-kik-aktif)
+- [🆕 Fitur Baru: Landing Page Pusat Informasi Kegiatan Kesenian (Agenda Publik)](#-fitur-baru-landing-page-pusat-informasi-kegiatan-kesenian-agenda-publik)
 - [Role & Hak Akses](#-role--hak-akses)
 - [Struktur Status Organisasi](#-struktur-status-organisasi)
 - [Instalasi Singkat](#-instalasi-singkat)
@@ -24,7 +24,7 @@
 
 ## 🧭 Gambaran Umum
 
-Aplikasi ini dibangun untuk membantu **Dinas Kebudayaan Dan Pariwisata Kabupaten Banyuwangi** mendata seluruh kelompok kesenian di wilayahnya secara digital — menggantikan proses manual berbasis kertas dengan alur **daftar → upload dokumen → verifikasi → terbit KTA**.
+Aplikasi ini dibangun untuk membantu **Dinas/Instansi Kebudayaan** mendata seluruh kelompok kesenian di wilayahnya secara digital — menggantikan proses manual berbasis kertas dengan alur **daftar → upload dokumen → verifikasi → terbit KTA**.
 
 Ada dua "dunia" utama dalam sistem ini:
 
@@ -63,21 +63,21 @@ Berikut perjalanan satu kelompok kesenian dari nol sampai punya kartu anggota re
 
 ### Penjelasan tahap demi tahap
 
-1. **Registrasi & Autentikasi** — `AuthController`
+1. **Registrasi & Autentikasi** — `RoleController`
    User mendaftar akun, menerima **kode verifikasi via email**, lalu login. Admin punya panel terpisah untuk kelola akun user (aktif/nonaktif, reset verifikasi).
 
-2. **Isi Data Organisasi** — `OrganisasiController`
+2. **Isi Data Organisasi** — `OrgController`
    Pengurus mengisi profil kelompok kesenian: nama, tanggal berdiri, jenis & sub-jenis kesenian, jumlah anggota, serta lokasi (kabupaten → kecamatan → desa) yang **dropdown-nya berjenjang otomatis** lewat endpoint AJAX (`getKecamatan`, `getDesa`, `getSubKesenian`).
 
-3. **Formulir Pendaftaran Multi-Step** — `DaftarController`
+3. **Formulir Pendaftaran Multi-Step** — `RegisterController`
    Setelah profil dasar tersimpan, sistem mengarahkan ke form berkelanjutan untuk melengkapi:
-    - Data anggota (`DataAnggotaController`)
-    - Data pendukung / dokumen wajib: **KTP, Pas Foto, Banner** (`DataPendukungController`)
-    - Inventaris kesenian, alat/properti (`InventarisController`)
+    - Data anggota (`AnggotaController`)
+    - Data pendukung / dokumen wajib: **KTP, Pas Foto, Banner** (`PendukungController`)
+    - Inventaris kesenian, alat/properti (`InventarisasiController`)
 
     Sistem otomatis **mengunci ulang pengajuan** jika sebelumnya ditolak, dan mencegah submit ganda saat status masih _menunggu verifikasi_ atau sudah _disetujui_.
 
-4. **Submit ke Admin** — `DaftarController::submit()`
+4. **Submit ke Admin** — `RegisterController::submit()`
    Sistem memvalidasi kelengkapan dokumen wajib sebelum mengizinkan pengajuan dikirim. Status berubah menjadi `Menunggu Verifikasi`.
 
 5. **Verifikasi Berjenjang oleh Admin** — `VerifikasiController`
@@ -85,18 +85,18 @@ Berikut perjalanan satu kelompok kesenian dari nol sampai punya kartu anggota re
 
 6. **Approve / Reject** — status organisasi berubah menjadi `Allow` (disetujui) atau `Denny` (ditolak, dengan catatan revisi yang tampil ke user).
 
-7. **Penerbitan Kartu Tanda Anggota (KTA)** — `KartuController` & `VerifikasiController::generateImageCard()` / `generateCard()`
+7. **Penerbitan Kartu Tanda Anggota (KTA)** — `CardController` & `VerifikasiController::generateImageCard()` / `generateCard()`
    Setelah disetujui, sistem men-generate **kartu digital berbasis gambar** (nama ketua, nomor induk, alamat, masa berlaku) menggunakan library image processing, siap dicetak atau diunduh sebagai PDF.
 
-8. **Perpanjangan Kartu** — `PerpanjangController`
+8. **Perpanjangan Kartu** — `Extontroller`
    Untuk kelompok lama yang kartunya kedaluwarsa, tersedia mekanisme **klaim data lama** cukup dengan memasukkan nomor kartu + nama ketua — tanpa perlu mendaftar dari nol.
 
 ### Di sisi Admin
 
-- **Dashboard & Statistik** — `AdminController` menyajikan ringkasan jumlah kesenian aktif/nonaktif, jumlah user aktif/nonaktif, lengkap dengan detail sekali klik (AJAX modal) dan laporan.
+- **Dashboard & Statistik** — `AdmController` menyajikan ringkasan jumlah kesenian aktif/nonaktif, jumlah user aktif/nonaktif, lengkap dengan detail sekali klik (AJAX modal) dan laporan.
 - **Data Kesenian Terpusat** — `KesenianController` menyediakan tabel besar dengan filter (pencarian nama, jenis, kecamatan, status) + **export PDF** (dikelompokkan per kecamatan) dan **export Excel**.
 - **Master Data** — `WilayahController` (data wilayah kabupaten/kecamatan/desa) dan `JenisKesenianController` (kategori & sub-kategori kesenian) dikelola terpisah agar dropdown pendaftaran selalu konsisten.
-- **Manajemen User** — `UsersController` & bagian admin di `AuthController` untuk CRUD akun, ubah status, dan reset verifikasi email.
+- **Manajemen User** — `UsersController` & bagian admin di `RoleController` untuk CRUD akun, ubah status, dan reset verifikasi email.
 - **Dokumen Resmi** — `WordController` men-generate surat/berkas resmi (misalnya surat keterangan) dalam format Word secara otomatis dari data organisasi.
 
 ---
@@ -126,65 +126,90 @@ Berikut perjalanan satu kelompok kesenian dari nol sampai punya kartu anggota re
 
 ---
 
-## 🆕 Fitur Baru: Input Kegiatan Kesenian
+## 🆕 Fitur Baru: Promosi Kegiatan (Khusus KIK Aktif)
 
 > ⚠️ **Catatan:** Detail spesifik fitur ini belum tercatat di riwayat percakapan yang bisa saya akses, sehingga rancangan di bawah adalah usulan berdasarkan konteks aplikasi (sistem pendataan kesenian). Silakan sesuaikan field/alur bila berbeda dari yang pernah didiskusikan sebelumnya.
 
-Setiap organisasi kesenian yang **sudah terverifikasi (`status = Allow`)** dapat mencatat **kegiatan/pentas** yang pernah atau akan mereka lakukan — pentas budaya, festival, latihan rutin, undangan tampil, dsb. Data ini menjadi bahan untuk:
+**Promosi Kegiatan** adalah fitur eksklusif untuk **KIK (Kelompok/Komunitas Informasi Kesenian) yang berstatus Aktif** — yaitu organisasi kesenian yang sudah lolos verifikasi penuh dan memegang Kartu Tanda Anggota (KTA) yang masih berlaku. Fitur ini membuka jalan bagi kelompok kesenian untuk **mempromosikan agenda kegiatan mereka ke publik**, secara resmi lewat kanal yang dikurasi Admin Dinas.
 
-- Portofolio digital kelompok kesenian (ditampilkan di halaman publik).
-- Bahan laporan Dinas terkait aktivitas kesenian di wilayahnya.
-- Sumber konten untuk **Landing Page Pusat Informasi Kegiatan Kesenian** (lihat bagian berikutnya).
+Ini bukan sekadar fitur pencatatan — ini adalah **corong publikasi budaya**: sekali disetujui, agenda tampil di halaman publik dan bisa dilihat serta dibagikan oleh masyarakat luas.
 
-### Rancangan Controller: `KegiatanController`
+### Kenapa hanya KIK Aktif yang bisa mengakses?
 
-| Method                   | Endpoint (contoh)                 | Deskripsi                                                    |
-| ------------------------ | --------------------------------- | ------------------------------------------------------------ |
-| `index()`                | `GET /kegiatan`                   | Daftar kegiatan milik organisasi login (user)                |
-| `create()`               | `GET /kegiatan/create`            | Form tambah kegiatan                                         |
-| `store()`                | `POST /kegiatan`                  | Simpan kegiatan baru                                         |
-| `edit($id)`              | `GET /kegiatan/{id}/edit`         | Form edit kegiatan                                           |
-| `update($id)`            | `PUT /kegiatan/{id}`              | Update kegiatan                                              |
-| `destroy($id)`           | `DELETE /kegiatan/{id}`           | Hapus kegiatan                                               |
-| `uploadDokumentasi($id)` | `POST /kegiatan/{id}/dokumentasi` | Upload foto/video dokumentasi                                |
-| `publish($id)` (admin)   | `PATCH /kegiatan/{id}/publish`    | Admin menyetujui kegiatan agar tampil di landing page publik |
+Pembatasan ini menjaga **kredibilitas informasi** yang tayang ke publik — hanya kelompok kesenian yang datanya sudah diverifikasi resmi oleh Dinas yang berhak mempromosikan kegiatannya. Ini sejalan dengan filosofi data quality yang sudah dipakai di seluruh aplikasi ini (`VerifikasiController`).
 
-### Rancangan skema data `Kegiatan`
+```
+Status KIK ─────► Aktif? ─────► Akses menu "Promosi Kegiatan"
+                     │
+                     └── Belum Aktif ──► Menu terkunci,
+                                          arahkan selesaikan verifikasi dulu
+```
 
-| Kolom                               | Tipe                 | Keterangan                                             |
-| ----------------------------------- | -------------------- | ------------------------------------------------------ |
-| `id`                                | bigint               | PK                                                     |
-| `organisasi_id`                     | FK → `organisasi`    | Pemilik kegiatan                                       |
-| `judul_kegiatan`                    | string               | Nama kegiatan/pentas                                   |
-| `jenis_kegiatan`                    | enum                 | `Pentas`, `Latihan`, `Festival`, `Undangan`, `Lainnya` |
-| `deskripsi`                         | text                 | Ringkasan kegiatan                                     |
-| `tanggal_mulai` / `tanggal_selesai` | date                 | Rentang waktu kegiatan                                 |
-| `lokasi`                            | string               | Tempat kegiatan berlangsung                            |
-| `dokumentasi`                       | json/relasi 1-banyak | Foto/video kegiatan                                    |
-| `status_publikasi`                  | enum                 | `Draft`, `Menunggu Review`, `Terbit`, `Ditolak`        |
-| `dilihat_oleh` (opsional)           | int                  | Counter kunjungan halaman publik                       |
+### Rancangan Controller: `PromosiController`
+
+| Method                         | Endpoint (contoh)                            | Deskripsi                                                      |
+| ------------------------------ | -------------------------------------------- | -------------------------------------------------------------- |
+| `index()`                      | `GET /promosi-kegiatan`                      | Daftar kegiatan milik KIK yang login                           |
+| `create()`                     | `GET /promosi-kegiatan/create`               | Form ajukan promosi kegiatan (hanya muncul jika KIK Aktif)     |
+| `store()`                      | `POST /promosi-kegiatan`                     | Simpan pengajuan kegiatan baru → status `Menunggu Persetujuan` |
+| `edit($id)`                    | `GET /promosi-kegiatan/{id}/edit`            | Form edit sebelum disetujui                                    |
+| `update($id)`                  | `PUT /promosi-kegiatan/{id}`                 | Update pengajuan                                               |
+| `destroy($id)`                 | `DELETE /promosi-kegiatan/{id}`              | Batalkan pengajuan                                             |
+| `uploadDokumentasi($id)`       | `POST /promosi-kegiatan/{id}/dokumentasi`    | Upload poster/foto kegiatan                                    |
+| `approve($id)` _(Admin Dinas)_ | `PATCH /admin/promosi-kegiatan/{id}/approve` | Menyetujui agar tayang di agenda publik                        |
+| `reject($id)` _(Admin Dinas)_  | `PATCH /admin/promosi-kegiatan/{id}/reject`  | Menolak dengan catatan revisi                                  |
+
+### Rancangan skema data `PromosiKegiatan`
+
+| Kolom                               | Tipe              | Keterangan                                                            |
+| ----------------------------------- | ----------------- | --------------------------------------------------------------------- |
+| `id`                                | bigint            | PK                                                                    |
+| `organisasi_id`                     | FK → `organisasi` | KIK pengaju (harus berstatus Aktif)                                   |
+| `judul_kegiatan`                    | string            | Nama kegiatan/pentas yang dipromosikan                                |
+| `jenis_kegiatan`                    | enum              | `Pentas`, `Festival`, `Undangan Tampil`, `Latihan Terbuka`, `Lainnya` |
+| `deskripsi`                         | text              | Ringkasan kegiatan untuk publik                                       |
+| `tanggal_mulai` / `tanggal_selesai` | date              | Jadwal kegiatan                                                       |
+| `lokasi`                            | string            | Tempat kegiatan berlangsung                                           |
+| `poster`                            | string/relasi     | Poster/gambar promosi kegiatan                                        |
+| `status_persetujuan`                | enum              | `Menunggu Persetujuan`, `Disetujui`, `Ditolak`                        |
+| `catatan_admin`                     | text (nullable)   | Alasan/catatan revisi dari Admin Dinas                                |
+| `dilihat_oleh` (opsional)           | int               | Counter kunjungan agenda publik                                       |
 
 ### Alur singkat
 
 ```
-Pengurus input kegiatan → status "Menunggu Review"
+KIK Aktif ajukan Promosi Kegiatan
         │
         ▼
-Admin review (opsional, mirip pola verifikasi organisasi)
+   Status: "Menunggu Persetujuan"
+        │
+        ▼
+  Admin Dinas meninjau
         │
    ┌────┴────┐
    ▼         ▼
-Terbit     Ditolak (+ catatan revisi)
+Disetujui   Ditolak (+ catatan revisi, KIK bisa perbaiki & ajukan ulang)
    │
    ▼
-Tampil otomatis di Landing Page Pusat Informasi Kegiatan Kesenian
+Tayang otomatis di Agenda Kegiatan Kesenian publik
 ```
 
-Pola ini **konsisten dengan alur verifikasi yang sudah ada** (`VerifikasiController`), sehingga admin tetap punya kendali kualitas atas konten yang tayang ke publik — tanpa perlu membangun mekanisme approval baru dari nol.
+Pola ini **konsisten dengan alur verifikasi yang sudah ada** (`VerifikasiController`), sehingga Admin Dinas tetap punya kendali kualitas atas konten yang tayang ke publik — tanpa perlu membangun mekanisme approval baru dari nol.
+
+### 💡 Kenapa ini sebuah inovasi Pemajuan Kebudayaan
+
+Fitur ini menerjemahkan semangat **Pemajuan Kebudayaan** (UU No. 5 Tahun 2017) ke dalam produk digital yang konkret:
+
+- **Pelindungan** — hanya kelompok kesenian terdata & terverifikasi yang bisa tampil, menjaga akurasi data budaya daerah.
+- **Pengembangan** — memberi ruang promosi setara bagi kelompok kesenian besar maupun kecil, tanpa perlu channel media sendiri.
+- **Pemanfaatan** — publik bisa menemukan & menghadiri kegiatan kesenian secara langsung dari satu sumber resmi.
+- **Pembinaan** — Admin Dinas mendapat gambaran utuh aktivitas kesenian di wilayahnya untuk kebijakan & pembinaan lanjutan.
+
+Singkatnya, sistem ini tidak berhenti di "pendataan administratif", tetapi ikut **menghidupkan ekosistem kesenian** dengan menjembatani kelompok kesenian ke publiknya.
 
 ---
 
-## 🆕 Fitur Baru: Landing Page Pusat Informasi Kegiatan Kesenian
+## 🆕 Fitur Baru: Landing Page Pusat Informasi Kegiatan Kesenian (Agenda Publik)
 
 Halaman publik (**tanpa perlu login**) yang berfungsi sebagai etalase digital kesenian daerah — dari sisi marketing, ini adalah **halaman akuisisi & engagement** yang menonjolkan aktivitas budaya secara visual dan mudah dibagikan ke media sosial.
 
@@ -224,7 +249,7 @@ Halaman publik (**tanpa perlu login**) yang berfungsi sebagai etalase digital ke
 | `show($id)`                | `GET /kegiatan-kesenian/{id}`          | Detail satu kegiatan + dokumentasi  |
 | `filter(Request $request)` | `GET /kegiatan-kesenian/filter` (AJAX) | Filter dinamis tanpa reload halaman |
 
-Sumber data halaman ini murni dari kegiatan dengan `status_publikasi = Terbit` milik organisasi yang `status = Allow` — jadi hanya konten yang sudah lolos verifikasi yang tampil ke publik, sejalan dengan filosofi data quality yang sudah dipakai di seluruh aplikasi ini.
+Sumber data halaman ini murni dari `PromosiKegiatan` dengan `status_persetujuan = Disetujui` milik KIK yang berstatus **Aktif** — jadi hanya agenda kegiatan yang sudah disetujui Admin Dinas yang tampil ke publik, sejalan dengan filosofi data quality yang sudah dipakai di seluruh aplikasi ini.
 
 > 💡 **Insight marketing:** halaman ini idealnya juga dilengkapi meta tag Open Graph per kegiatan (judul, gambar, deskripsi) agar tampilan preview saat dibagikan ke WhatsApp/Instagram/Facebook menarik — mendorong warga untuk datang menonton pentas kesenian lokal.
 
@@ -271,8 +296,8 @@ Pastikan konfigurasi **mail** (untuk verifikasi email OTP) dan library **Interve
 
 ## 🗺️ Roadmap
 
-- [ ] Modul **Input Kegiatan Kesenian** (`KegiatanController`)
-- [ ] **Landing Page Pusat Informasi Kegiatan Kesenian** publik
+- [ ] Modul **Promosi Kegiatan** khusus KIK Aktif (`PromosiController`)
+- [ ] **Landing Page Pusat Informasi Kegiatan Kesenian / Agenda Publik**
 - [ ] Notifikasi WhatsApp/Email otomatis saat status verifikasi berubah
 - [ ] Statistik & dashboard analytics kegiatan per wilayah
 - [ ] API publik read-only untuk integrasi dengan portal Pemda
