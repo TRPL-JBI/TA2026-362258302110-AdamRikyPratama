@@ -1,4 +1,4 @@
-# 🎭 SIKESAN — Sistem Informasi & Pendataan Kesenian Daerah
+# 🎭 KITA BANYUWANGI — KARTU INDUK KESENIAN DIGITAL BANYUWANGI
 
 > Platform digital untuk pendataan, verifikasi, dan pusat informasi kelompok/organisasi kesenian daerah — dari pendaftaran mandiri oleh komunitas seni, verifikasi berjenjang oleh admin, hingga penerbitan Kartu Tanda Anggota (KTA) digital.
 
