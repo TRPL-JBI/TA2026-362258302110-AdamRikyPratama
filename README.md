@@ -24,7 +24,7 @@
 
 ## 🧭 Gambaran Umum
 
-Aplikasi ini dibangun untuk membantu **Dinas/Instansi Kebudayaan** mendata seluruh kelompok kesenian di wilayahnya secara digital — menggantikan proses manual berbasis kertas dengan alur **daftar → upload dokumen → verifikasi → terbit KTA**.
+Aplikasi ini dibangun untuk membantu **Dinas/Instansi Kebudayaan** mendata seluruh kelompok kesenian di wilayahnya secara digital — menggantikan proses manual berbasis kertas dengan alur **daftar → upload dokumen → verifikasi → terbit KIK**.
 
 Ada dua "dunia" utama dalam sistem ini:
 
